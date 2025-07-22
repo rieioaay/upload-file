@@ -1,97 +1,71 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>画像選択・削除・アップロード</title>
+  <title>複数写真のバス停情報入力</title>
   <style>
-    .preview-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    .image-wrapper {
-      position: relative;
-      display: inline-block;
-    }
-    .image-wrapper img {
-      max-width: 150px;
-      max-height: 150px;
+    .form-block {
       border: 1px solid #ccc;
+      padding: 10px;
+      margin-bottom: 10px;
+      position: relative;
     }
-    .remove-btn {
+    .preview {
+      max-width: 200px;
+      margin-top: 5px;
+    }
+    .delete-btn {
       position: absolute;
-      top: 2px;
-      right: 2px;
-      background: red;
+      top: 5px;
+      right: 5px;
+      background-color: #f44336;
       color: white;
       border: none;
-      border-radius: 50%;
-      width: 20px;
-      height: 20px;
+      padding: 5px;
       cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <h2>画像を選択してアップロード</h2>
-  <form id="uploadForm" method="POST" enctype="multipart/form-data" action="/upload">
-    <input type="file" id="imageInput" name="images" accept="image/*" multiple>
-    <div class="preview-container" id="previewContainer"></div>
-    <br>
-    <button type="submit">アップロード</button>
-  </form>
+  <h2>バス停情報入力</h2>
+  <label>写真を選択（複数可）: 
+    <input type="file" accept="image/*" multiple onchange="handleMultiplePhotos(this)">
+  </label>
+  <div id="form-container"></div>
 
   <script>
-    const imageInput = document.getElementById('imageInput');
-    const previewContainer = document.getElementById('previewContainer');
-    const uploadForm = document.getElementById('uploadForm');
-    let selectedFiles = [];
+    function handleMultiplePhotos(input) {
+      const files = input.files;
+      const container = document.getElementById("form-container");
 
-    imageInput.addEventListener('change', function(event) {
-      const files = Array.from(event.target.files);
-      selectedFiles = files;
-      previewContainer.innerHTML = '';
-
-      files.forEach((file, index) => {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
         const reader = new FileReader();
-        reader.onload = function(e) {
-          const wrapper = document.createElement('div');
-          wrapper.className = 'image-wrapper';
 
-          const img = document.createElement('img');
-          img.src = e.target.result;
+        reader.onload = function (e) {
+          const newBlock = document.createElement("div");
+          newBlock.className = "form-block";
 
-          const btn = document.createElement('button');
-          btn.textContent = '×';
-          btn.className = 'remove-btn';
-          btn.onclick = function() {
-            selectedFiles.splice(index, 1);
-            wrapper.remove();
-            updateInputFiles();
-          };
-
-          wrapper.appendChild(img);
-          wrapper.appendChild(btn);
-          previewContainer.appendChild(wrapper);
+          newBlock.innerHTML = `
+            <button class="delete-btn" onclick="this.parentElement.remove()">削除</button>
+            <img class="preview" src="${e.target.result}"><br>
+            <label>撮影日: <input type="date" name="date"></label><br>
+            <label>AI型式識別: <input type="text" name="type"></label><br>
+            <label>型式修正: <input type="text" name="typeFix"></label><br>
+            <label>AI劣化度: <input type="text" name="degradation"></label><br>
+            <label>標識: <input type="text" name="sign"></label><br>
+            <label>ベンチ: <input type="text" name="bench"></label><br>
+            <label>備考: <textarea name="notes"></textarea></label>
+          `;
+          container.appendChild(newBlock);
         };
+
         reader.readAsDataURL(file);
-      });
-    });
-
-    function updateInputFiles() {
-      const dataTransfer = new DataTransfer();
-      selectedFiles.forEach(file => dataTransfer.items.add(file));
-      imageInput.files = dataTransfer.files;
-    }
-
-    uploadForm.addEventListener('submit', function(e) {
-      if (selectedFiles.length === 0) {
-        e.preventDefault();
-        alert('画像を選択してください。');
       }
-    });
+
+      // 選択済みファイルをクリア（再選択可能にする）
+      input.value = "";
+    }
   </script>
 </body>
 </html>
