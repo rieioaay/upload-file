@@ -52,56 +52,5 @@
     }
   </script>
 
-<script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
-<script>
-function handleMultiplePhotos(input) {
-  const files = input.files;
-  const container = document.getElementById("form-container");
-
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i];
-    const reader = new FileReader();
-
-    reader.onload = function (e) {
-      const newBlock = document.createElement("div");
-      newBlock.className = "form-block";
-
-      const img = document.createElement("img");
-      img.className = "preview";
-      img.src = e.target.result;
-      img.style.maxWidth = "200px";
-
-      const dateLabel = document.createElement("p");
-      dateLabel.textContent = "撮影日: 読み取り中...";
-
-      EXIF.getData(file, function() {
-        const date = EXIF.getTag(this, "DateTimeOriginal");
-        if (date) {
-          dateLabel.textContent = "撮影日: " + date;
-        } else {
-          dateLabel.textContent = "撮影日: 不明";
-        }
-      });
-
-      const deleteBtn = document.createElement("button");
-      deleteBtn.textContent = "削除";
-      deleteBtn.className = "delete-btn";
-      deleteBtn.onclick = function() {
-        newBlock.remove();
-      };
-
-      newBlock.appendChild(deleteBtn);
-      newBlock.appendChild(img);
-      newBlock.appendChild(dateLabel);
-      container.appendChild(newBlock);
-    };
-
-    reader.readAsDataURL(file);
-  }
-
-  input.value = "";
-}
-</script>
-
 </body>
 </html>
